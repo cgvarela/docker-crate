@@ -26,8 +26,9 @@ RUN set -x \
 
 RUN addgroup crate && adduser -G crate -H crate -D
 
-# install crate
-ENV CRATE_VERSION 0.55.7
+ENV CDN_URL https://cdn.crate.io/downloads/releases/nightly/
+ENV TARBALL crate-0.57.0-201610190301-23ae63b.tar.gz
+
 RUN apk add --no-cache --virtual .crate-rundeps \
         openjdk8-jre-base \
         python3 \
@@ -37,14 +38,9 @@ RUN apk add --no-cache --virtual .crate-rundeps \
         curl \
         gnupg \
         tar \
-    && curl -fSL -O https://cdn.crate.io/downloads/releases/crate-$CRATE_VERSION.tar.gz \
-    && curl -fSL -O https://cdn.crate.io/downloads/releases/crate-$CRATE_VERSION.tar.gz.asc \
-    && export GNUPGHOME="$(mktemp -d)" \
-    && gpg --keyserver ha.pool.sks-keyservers.net --recv-keys 90C23FC6585BC0717F8FBFC37FAAE51A06F6EAEB \
-    && gpg --batch --verify crate-$CRATE_VERSION.tar.gz.asc crate-$CRATE_VERSION.tar.gz \
-    && rm -r "$GNUPGHOME" crate-$CRATE_VERSION.tar.gz.asc \
+    && curl -fSL -O "${CDN_URL}${TARBALL}" \
     && mkdir /crate \
-    && tar -xf crate-$CRATE_VERSION.tar.gz -C /crate --strip-components=1 \
+    && tar -xf "${TARBALL}" -C /crate --strip-components=1 \
     && ln -s /usr/bin/python3 /usr/bin/python \
     && rm /crate/plugins/sigar/lib/libsigar-amd64-linux.so \
     && chown -R crate /crate \
